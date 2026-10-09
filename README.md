@@ -1,57 +1,52 @@
 # Lab 04 — The Dance Floor
 
-In class we filled the canvas with a grid of dancers using two nested loops. Each cell has its own color and its own speed, stored in 2D arrays, and `animate()` is a function that draws one dancer. Moving the mouse left and right changes how many columns there are.
+In class we made a grid of dancers with two nested loops. Every cell has its own color and speed, stored in 2D arrays. `animate()` draws one dancer.
 
-In this lab you make the dancers **notice the mouse**, and you fill the floor with **two different dances**. Then you put it on your website.
+In this lab the dancers **react to the mouse**, and the floor gets **two different dances**. Then you put it on your website.
 
 ## Start from the in-class sketch
 
-Use your own code from class. If yours isn't working, the [`starter/`](starter/) folder of this repo has the in-class sketch, ready for your website:
+Use your own code from class. If it isn't working, use the [`starter/`](starter/) folder:
 
 ```
 starter/
 ├── sketch.js         the in-class sketch, ready for your website
 ├── dance_frames/     dance0.png ... dance7.png   (8 poses)
-└── jump_frames/      jump0.png ... jump3.png     (4 poses, a second dance)
+└── jump_frames/      jump0.png ... jump3.png     (4 poses, the second dance)
 ```
 
 ![The four jump poses](jump_preview.png)
 
 1. In your website repo, copy your `lab-03/` folder and rename the copy `lab-04`.
 2. On this repo's GitHub page, click the green **Code** button, then **Download ZIP**. Unzip it.
-3. Copy `jump_frames/` into your `lab-04/` folder. If you are using the starter, copy everything inside `starter/` and let it replace `sketch.js`.
-4. Open `lab-04/index.html` with Live Server. You should see the grid of dancers before you change anything.
+3. Copy `jump_frames/` into `lab-04/`. If you're using the starter, copy everything inside `starter/` and let it replace `sketch.js`.
+4. Open `lab-04/index.html` with Live Server. You should see the grid before you change anything.
 
-Even better: use your own frames from Lab 03 for one of the two dances.
+Better: use your own frames from Lab 03 for one of the dances.
 
 ## What to add
 
 Do **both**.
 
-### 1. Dancers that feel the mouse
+### 1. Dancers that react to the mouse
 
-Each dancer measures how far it is from the mouse, and uses that distance to set its speed. Dancers near the mouse dance fast. Dancers far away dance slowly (or the other way around, your choice).
+Each dancer checks how far it is from the mouse and uses that distance as its speed. Close to the mouse: fast. Far away: slow. Or the other way around.
 
-You need two p5 functions:
+Use two p5 functions:
 
 - `dist(x1, y1, x2, y2)` gives the distance between two points.
-- `map(value, start1, stop1, start2, stop2)` converts a number from one range to another. `map(d, 0, 500, 2, 20)` turns a distance between 0 and 500 into a speed between 2 and 20.
+- `map(value, start1, stop1, start2, stop2)` moves a number from one range to another. `map(d, 0, 500, 2, 20)` turns a distance from 0 to 500 into a speed from 2 to 20.
 
-Do this **inside the nested loop** in `draw()`, so every dancer gets its own distance.
+Do it **inside the nested loop** in `draw()`, so each dancer gets its own distance.
 
 <details>
 <summary><b>Hint 1:</b> where is each dancer?</summary>
 
-The dancer in column `i`, row `j` starts at `i * colWidth, j * rowHeight`. That's its top-left corner. The middle of the cell is half a cell further:
+The dancer at column `i`, row `j` has its top-left corner at `i * colWidth, j * rowHeight`. Add half a cell to get the middle:
 
 ```js
 let x = i * colWidth + colWidth / 2;
 let y = j * rowHeight + rowHeight / 2;
-```
-
-Then:
-
-```js
 let d = dist(x, y, mouseX, mouseY);
 ```
 
@@ -60,59 +55,57 @@ let d = dist(x, y, mouseX, mouseY);
 <details>
 <summary><b>Hint 2:</b> what numbers go in <code>map()</code>?</summary>
 
-The smallest distance is `0`: the mouse is right on the dancer.
-
-The biggest distance is from one corner of the canvas to the other. You can let p5 measure it:
+The smallest distance is `0`. The biggest is corner to corner:
 
 ```js
 let maxDist = dist(0, 0, width, height);
 ```
 
-The output range is the speed. Look at `getFrameIndex()`: `speed` is how many draw-frames each pose stays on screen. So a **small** number is **fast** and a **big** number is **slow**. Close to the mouse should be fast:
+Look at `getFrameIndex()`: `speed` is how many frames each pose stays on screen. **Small = fast. Big = slow.**
 
 ```js
 let speed = map(d, 0, maxDist, 2, 20);
 ```
 
-Then pass `speed` to `animate()` instead of `speeds[i][j]`.
+Pass `speed` to `animate()` instead of `speeds[i][j]`.
 
 </details>
 
 <details>
-<summary><b>Hint 3:</b> all the dancers now move in sync. I miss the random speeds.</summary>
+<summary><b>Hint 3:</b> now they all dance in sync. Where did the random speeds go?</summary>
 
-Keep the random speed and use the distance to scale it up or down:
+Keep the random speed and scale it with the distance:
 
 ```js
 let speed = speeds[i][j] * map(d, 0, maxDist, 0.5, 3);
 ```
 
-Don't let the speed reach `0`. `frameCount / 0` breaks the animation.
+Never let the speed hit `0`.
 
 </details>
 
 ### 2. Two dances on one floor
 
-The grid should alternate between **two different animations**: the 8 dance poses and the 4 jump poses (or your own frames). A checkerboard, stripes, whatever pattern you like, as long as both dances are on the floor.
+Alternate the grid between **two animations**: the 8 dance poses and the 4 jump poses (or your own). Checkerboard, stripes, your call. Both dances have to be on the floor.
 
-Your `animate()` function should do this. Don't write a second copy of it. One function, called with different arrays.
+Use **one** `animate()` function and pass it a different array. Don't copy the function.
 
 <details>
 <summary><b>Hint 4:</b> loading the second dance</summary>
 
-There's already an empty `frames2` array at the top of the sketch. Fill it in `setup()` with a loop, exactly like `frames`, but with the jump file names. There are only **4** jump poses, not 8.
+`frames2` is already at the top of the sketch, empty. Fill it in `setup()` with a loop, like `frames`. There are **4** jump poses, not 8.
 
 </details>
 
 <details>
-<summary><b>Hint 5:</b> deciding which dance goes in which cell</summary>
+<summary><b>Hint 5:</b> which dance goes in which cell?</summary>
 
-`%` gives the remainder after dividing. `n % 2` is `0` for even numbers and `1` for odd numbers.
+`n % 2` is `0` for even numbers and `1` for odd.
 
-- `i % 2` alternates column by column: stripes.
-- `(i + j) % 2` alternates in both directions: a checkerboard. Try it on paper: write `i + j` in each cell of a small grid and see which cells are even.
+- `i % 2` alternates by column: stripes.
+- `(i + j) % 2` alternates both ways: a checkerboard. Try it on paper.
 
-Pick the array first, then call `animate()` once:
+Pick the array, then call `animate()` once:
 
 ```js
 let danceFrames;
@@ -127,17 +120,17 @@ animate(danceFrames, speed, ...);
 </details>
 
 <details>
-<summary><b>Hint 6:</b> the dancers freeze after a moment</summary>
+<summary><b>Hint 6:</b> everything freezes after a moment</summary>
 
-Open the console. If you see `Cannot read properties of undefined (reading 'width')`, look closely at `getFrameIndex()`:
+Check the console for `Cannot read properties of undefined (reading 'width')`. Then look at this line in `getFrameIndex()`:
 
 ```js
 let index = slowFrame % frames.length;
 ```
 
-Which `frames` is that? Inside `animate()`, `frames` is the **parameter**, the array you passed in. But `getFrameIndex()` is a different function and doesn't have that parameter, so it uses the **global** `frames`, the one with 8 poses. It hands back indexes up to 7, and `frames2` only has 4.
+Which `frames` is that? Inside `animate()`, `frames` is the parameter you passed in. `getFrameIndex()` doesn't have that parameter, so it uses the **global** `frames`, which has 8 poses. It returns indexes up to 7, but `frames2` only has 4.
 
-Fix: give `getFrameIndex()` a second parameter for the array, and pass it from `animate()`:
+Fix: give `getFrameIndex()` a parameter for the array, and pass it from `animate()`:
 
 ```js
 let index = getFrameIndex(frames, speed);
@@ -147,8 +140,8 @@ let index = getFrameIndex(frames, speed);
 
 ### Bonus
 
-- Use the distance for **more than speed**: the size of each dancer (there's a TODO in `animate()` about keeping the scale right), the `fill()` alpha, or a `tint()`.
-- Use the distance to **pick the dance**: close to the mouse they jump, far away they dance.
+- Use the distance for **more than speed**: size (see the TODO in `animate()`), `fill()` alpha, or `tint()`.
+- Use the distance to **pick the dance**: jump near the mouse, dance far away.
 - Add a **third** dance.
 
 Weird is good. Have fun with it.
@@ -176,7 +169,7 @@ Need a reminder on adding a folder to your site? See [section 4 of the personal-
 
 Open the browser console (right-click the page → **Inspect** → **Console**) and read the red text.
 
-- **Blank canvas and `404 (File not found)`**: an image path is wrong. Check the folder name (`jump_frames`), the file name (`jump0.png`), and the extension.
+- **Blank canvas and `404 (File not found)`**: an image path is wrong. Check the folder name, the file name, and the extension.
 - **Everything freezes, and the console says `Cannot read properties of undefined (reading 'width')`**: an index is past the end of an array. See Hint 6.
-- **The dancers flicker wildly, or barely move**: your speed is too small, negative, or huge. `console.log(speed)` inside the loop and check the numbers.
+- **Dancers flicker like crazy or barely move**: your speed is too small, negative, or huge. Put `console.log(speed)` in the loop and check the numbers.
 - **Works with Live Server but not on GitHub Pages**: check capital letters. GitHub Pages cares about `Jump0.png` vs `jump0.png`.
