@@ -42,7 +42,7 @@ import numpy as np
 from PIL import Image
 
 S = 4                       # scale factor for the dance frames
-PART_SCALE = 4              # scale factor for the body-part sprites (see above)
+PART_SCALE = 3              # scale factor for the body-part sprites (see above)
 W, H = 40, 50               # logical canvas  (x4 = 160 x 200)
 CX = 20                     # horizontal centre of the character
 GROUND = 49                 # logical row just below the feet (outline row, last row of canvas)
