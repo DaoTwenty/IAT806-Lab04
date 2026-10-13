@@ -1,5 +1,7 @@
 let frames = [];
 let bg;
+let backgrounds = [];
+let bg_idx = 0;
 let grid = {width: 72, height: 128};
 let zombies = []
 let NUM_ZOMBIES = 5;
@@ -19,9 +21,14 @@ async function setup() {
         frames.push(await loadZombie(i));
     }
 
+    backgrounds.push(await loadImage("assets/backgrounds/airport.png"));
+    backgrounds.push(await loadImage("assets/backgrounds/empty_mall.png"));
+    backgrounds.push(await loadImage("assets/backgrounds/giant_picnic.png"));
+    backgrounds.push(await loadImage("assets/backgrounds/street_intersection.png"));
+
     // load background arena
     bg = new WalkableBackground(
-        await loadImage("assets/backgrounds/airport.png"), 
+        backgrounds[bg_idx], 
         0.1 * width, 
         0.9 * width, 
         0.1 * height, 
@@ -103,6 +110,14 @@ function mouseClicked() {
 }
 
 function keyPressed(event) {
+
+    // change background
+    if (key == 'b') {
+        bg_idx += 1;
+        bg_idx = bg_idx % 4;
+        bg.image = backgrounds[bg_idx];
+    }
+
     // when press 'd', zombies get in line to dance
     if (key == 'd') {
         bg.dance_mode = true;
