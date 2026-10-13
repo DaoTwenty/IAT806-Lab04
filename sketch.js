@@ -87,6 +87,10 @@ function draw() {
         }
         zombies[i].animation.draw();
     }
+
+    // draw the search beams
+    bg.draw_beam();
+
 }
 
 function mouseClicked() {

@@ -1,4 +1,13 @@
 
+let x_a;
+let y_a;
+let D_prime;
+let D;
+let x_0;
+let y_0;
+let x_1;
+let y_1;
+
 // class for the walkable background arena/scene
 class WalkableBackground {
 
@@ -19,6 +28,90 @@ class WalkableBackground {
     // get index of disco animation
     get_index() {
         return Math.floor((frameCount / 5) % this.disco_images.length);
+    }
+
+    draw_beam() {
+        // if mouse is inside of screen
+        // otherwise we dont draw the beams
+        if (mouseX >= 0 && mouseX < width && mouseY >= 0 && mouseY < height) {
+            push();
+            colorMode(RGB);
+            noStroke();
+            fill(255, 255, 255, 130);
+
+            let a = 50;
+            let b = 25;
+
+            // search beam is a ellipse on the ground
+            ellipse(
+                mouseX,
+                mouseY,
+                2*a,
+                2*b
+            );
+
+            push();
+            fill(255, 255, 255, 60);
+            // same ellipse but for clipping the triangle,
+            // inverted so the triangle is cut out where the ellipse is
+            clip(() => {
+                ellipse(
+                    mouseX,
+                    mouseY,
+                    2*a,
+                    2*b
+                );
+            }, { invert: true });
+
+            // using some math we calculate tangents to the ellpise
+            // from the disco ball positions
+            y_a = this.disco_position - mouseY;
+            x_a = 0.05 * width - mouseX;
+            D_prime = b**2 * x_a**2 + a**2 * y_a**2;
+            D = D_prime - a**2 * b**2;
+
+            if (D > 0) {
+
+                x_0 = a**2 * (b**2 * x_a + y_a * Math.sqrt(D))/D_prime
+                x_1 = a**2 * (b**2 * x_a - y_a * Math.sqrt(D))/D_prime
+                y_0 = b**2 * (a**2 * y_a - x_a * Math.sqrt(D))/D_prime
+                y_1 = b**2 * (a**2 * y_a + x_a * Math.sqrt(D))/D_prime
+
+                triangle(
+                    Math.floor(0.05 * width),
+                    this.disco_position,
+                    mouseX + x_0,
+                    mouseY + y_0,
+                    mouseX + x_1,
+                    mouseY + y_1
+                );
+            }
+
+            y_a = this.disco_position - mouseY;
+            x_a = 0.95 * width - mouseX;
+            D_prime = b**2 * x_a**2 + a**2 * y_a**2;
+            D = D_prime - a**2 * b**2;
+
+            if (D > 0) {
+
+                x_a = 0.95 * width - mouseX;
+                x_0 = a**2 * (b**2 * x_a + y_a * Math.sqrt(D))/D_prime
+                x_1 = a**2 * (b**2 * x_a - y_a * Math.sqrt(D))/D_prime
+                y_0 = b**2 * (a**2 * y_a - x_a * Math.sqrt(D))/D_prime
+                y_1 = b**2 * (a**2 * y_a + x_a * Math.sqrt(D))/D_prime
+
+                triangle(
+                    Math.floor(0.95 * width),
+                    this.disco_position,
+                    mouseX + x_0,
+                    mouseY + y_0,
+                    mouseX + x_1,
+                    mouseY + y_1
+                );
+            }
+            pop();
+            pop();
+        }
     }
 
     // draw the background

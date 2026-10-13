@@ -129,6 +129,34 @@ class WalkingDancingAnimation {
     go_to_and_dance(x_target, y_target) {
         this.x_target = x_target;
         this.y_target = y_target;
+        this.dy = this.y_target - this.y;
+        this.dx = this.x_target - this.x;
+        // how to move diagonally to target
+        this.diagonal = min(abs(this.dy), abs(this.dx));
+        // direction index of the diagonal movement from the signs of dx and dy
+        if (this.dx >= 0 && this.dy >= 0) {
+            this.diagonal_direction = 1;   // SE
+        } else if (this.dx < 0 && this.dy >= 0) {
+            this.diagonal_direction = 3;   // SW
+        } else if (this.dx < 0 && this.dy < 0) {
+            this.diagonal_direction = 5;   // NW
+        } else {
+            this.diagonal_direction = 7;   // NE
+        }
+        // how to move straight to target
+        // is along x if x has more distance to cover, otherwise along y
+        this.straight = abs(abs(this.dx) - abs(this.dy));
+        if (abs(this.dx) > abs(this.dy)) {
+            // going east or west
+            this.straight_direction = this.dx >= 0 ? 0 : 4; 
+        } else {
+            // going north or south
+            this.straight_direction = this.dy >= 0 ? 2 : 6;  
+        }
+
+        // we randomly decide whether to do diag or straight movement first
+        this.diag_first = random(0,1) > 0.5;
+
         this.on_a_mission = true;
     }
 
@@ -141,8 +169,16 @@ class WalkingDancingAnimation {
     }
 
     update_pos() {
-        // update direction with potential bounce of borders
         if (!this.on_a_mission) {
+
+            // randomly change direction
+            if (!this.dancing && random(0,1) < 0.01) {
+                this.direction += 2*randint(0, 2) - 1;
+                this.direction = (this.direction + 8) % 8;
+                this.cardinal_direction = CARD_TO_DIR[this.direction];
+            }
+
+            // update direction with potential bounce of borders
             this.cardinal_direction = this.bounceMethod(
                 this.x, 
                 this.y, 
@@ -151,27 +187,32 @@ class WalkingDancingAnimation {
             );
         } else {
             //check if we are close
-            if (abs(this.x - this.x_target) < 1 && abs(this.y - this.y_target) < 1) {
+            if (this.diagonal <= 0 && this.straight <= 0) {
                 this.x = this.x_target;
                 this.y = this.y_target;
                 this.on_a_mission = false;
                 this.dancing = true;
                 return;
             }
-            // determine angle to target
-            let angle = 180 * Math.atan2(
-                this.y_target - this.y, 
-                this.x_target - this.x
-            ) / PI;
-            angle = (angle + 360) % 360;
 
-            // snap to nearest direction
-            this.direction = Math.round(angle / 45) % 8;
+            // set the direction to either diagonal or straight
+            if (this.diagonal > 0 && (this.diag_first || this.straight <= 0)) {   
+                this.direction = this.diagonal_direction;
+
+                //update diagonal
+                this.diagonal -= this.walk_speed / Math.sqrt(2);
+            } else if (this.straight > 0) {
+                this.direction = this.straight_direction;
+
+                //update straight
+                this.straight -= this.walk_speed;
+            }
             this.cardinal_direction = CARD_TO_DIR[this.direction];
         }
         // update position with speed when walking
         this.x += this.walk_speed * this.cardinal_direction[0];
         this.y += this.walk_speed * this.cardinal_direction[1];
+
         // adjust index with new cardinal dir
         this.direction = CARD_TO_DIR.findIndex(
             (dir) => {
